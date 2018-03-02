@@ -3,6 +3,7 @@ from tqdm import tqdm
 from bs4 import BeautifulSoup
 
 parser = argparse.ArgumentParser(description='Generate a csv of anime scores for the given users')
+parser.add_argument('-m', action='store_true', help='Get the MAL scores')
 parser.add_argument('inputValues', nargs='+', help='The names of the users you want added to the csv, with spaces in between')
 args = parser.parse_args()
 
@@ -11,13 +12,18 @@ animeScores = []
 
 def getMALScore(id):
     # return "disabled"
-    with requests.session() as browser:
-        browser.headers['user-agent'] = 'Mozilla/5.0'
-        r = browser.get("https://myanimelist.net/anime/" + id)
-        time.sleep(1)
-        soup = BeautifulSoup(r.text, 'html.parser')
-        score = soup.find('div',{'class': 'fl-l score'})
-        return(score.text.strip())
+    if(args.m):
+        with requests.session() as browser:
+            browser.headers['user-agent'] = 'Mozilla/5.0'
+            r = browser.get("https://myanimelist.net/anime/" + id)
+            time.sleep(1)
+            soup = BeautifulSoup(r.text, 'html.parser')
+            score = soup.find('div',{'class': 'fl-l score'})
+            return(score.text.strip())
+    else:
+        return "disabled"
+    
+    
 
 def getXML(user):
     url = "https://myanimelist.net/malappinfo.php?u=" + user + "&type=anime&status=all"
