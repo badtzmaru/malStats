@@ -58,9 +58,13 @@ def main():
     print(str(len(animeScores)) + " shows found")
     with open('scores.csv', 'w', encoding="utf-8") as file:
         for show in animeScores:
-            print(show)
-            file.write(show[0].replace(",","") + ",=AVERAGE(F2:K2)," + show[1] + ",")
-            for score in show[2]:
-                file.write(str(score) + ",")
-            file.write("\n")
+            counter = 0
+            for u in range(0,len(show[2])):
+                if show[2][u] != "":
+                    counter += 1
+            if counter > 1:
+                file.write(show[0].replace(",","") + ",=AVERAGE(F2:K2)," + show[1] + ",")
+                for score in show[2]:
+                    file.write(str(score) + ",")
+                file.write("\n")
 main()
