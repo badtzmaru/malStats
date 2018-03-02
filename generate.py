@@ -1,4 +1,5 @@
-import requests, os, argparse
+import requests, os, argparse, time
+from tqdm import tqdm
 from bs4 import BeautifulSoup
 
 parser = argparse.ArgumentParser(description='Generate a csv of anime scores for the given users')
@@ -9,8 +10,12 @@ animeScores = []
 # animeScores = [['tororo','9.5',[10,10]]]
 
 def getMALScore(id):
-    # https://myanimelist.net/anime/
-    pass
+    with requests.session() as browser:
+        browser.headers['user-agent'] = 'Mozilla/5.0'
+        r = browser.get("https://myanimelist.net/anime/" + id)
+        soup = BeautifulSoup(r.text, 'html.parser')
+        score = soup.find('div',{'class': 'fl-l score'})
+        return(score.text.strip())
 
 def getXML(user):
     url = "https://myanimelist.net/malappinfo.php?u=" + user + "&type=anime&status=all"
@@ -26,8 +31,9 @@ def parseList(user):
     with open("xml/" + user + ".xml", encoding='utf8') as infile:
         soup = BeautifulSoup(infile, "html.parser")
         animeTags = soup.find_all("anime")
-        for i in range(0,len(animeTags)):
+        for i in tqdm(range(0,len(animeTags))):
             if animeTags[i].find("my_status").text ==  "2" and animeTags[i].find("series_type").text != "3":
+                time.sleep(.5)
                 
                 title = animeTags[i].find("series_title").text
                 found = False
@@ -39,16 +45,15 @@ def parseList(user):
                         break
                 
                 if found == False:
-                    animeScores.append([title, animeTags[i].find("series_animedb_id").text, [int(animeTags[i].find("my_score").text)]])
+                    animeScores.append([title, getMALScore(animeTags[i].find("series_animedb_id").text), [int(animeTags[i].find("my_score").text)]])
 
 def main():
     for user in args.inputValues:
         # getXML(user)
         parseList(user)
 
-    # writeCSV()
     print(len(animeScores))
     print(animeScores[0])
-    # for anime in animeScores:
-    #     print(anime[0])
+
+
 main()
