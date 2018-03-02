@@ -10,9 +10,11 @@ animeScores = []
 # animeScores = [['tororo','9.5',[10,10]]]
 
 def getMALScore(id):
+    # return "disabled"
     with requests.session() as browser:
         browser.headers['user-agent'] = 'Mozilla/5.0'
         r = browser.get("https://myanimelist.net/anime/" + id)
+        time.sleep(1)
         soup = BeautifulSoup(r.text, 'html.parser')
         score = soup.find('div',{'class': 'fl-l score'})
         return(score.text.strip())
@@ -27,33 +29,38 @@ def getXML(user):
         open("xml/" + user  + ".xml", 'wb').write(r.content)
         return True
 
-def parseList(user):
+def parseList(user,index):
     with open("xml/" + user + ".xml", encoding='utf8') as infile:
         soup = BeautifulSoup(infile, "html.parser")
         animeTags = soup.find_all("anime")
         for i in tqdm(range(0,len(animeTags))):
             if animeTags[i].find("my_status").text ==  "2" and animeTags[i].find("series_type").text != "3":
-                time.sleep(.5)
                 
                 title = animeTags[i].find("series_title").text
                 found = False
 
                 for k in range(0, len(animeScores)):
                     if animeScores[k][0] == title:
-                        animeScores[k][2].append(int(animeTags[i].find("my_score").text))
+                        animeScores[k][2][index] = int(animeTags[i].find("my_score").text)
                         found = True
                         break
                 
                 if found == False:
-                    animeScores.append([title, getMALScore(animeTags[i].find("series_animedb_id").text), [int(animeTags[i].find("my_score").text)]])
+                    animeScores.append([title, getMALScore(animeTags[i].find("series_animedb_id").text), [""] * len(args.inputValues)])
+                    animeScores[len(animeScores)-1][2][index] = int(animeTags[i].find("my_score").text)
 
 def main():
-    for user in args.inputValues:
-        # getXML(user)
-        parseList(user)
+    for m in range(0,len(args.inputValues)):
+        user = args.inputValues[m]
+        getXML(user)
+        parseList(user,m)
 
-    print(len(animeScores))
-    print(animeScores[0])
-
-
+    print(str(len(animeScores)) + " shows found")
+    with open('scores.csv', 'w', encoding="utf-8") as file:
+        for show in animeScores:
+            print(show)
+            file.write(show[0].replace(",","") + ",=AVERAGE(F2:K2)," + show[1] + ",")
+            for score in show[2]:
+                file.write(str(score) + ",")
+            file.write("\n")
 main()
