@@ -9,6 +9,7 @@ args = parser.parse_args()
 
 animeScores = []
 # animeScores = [['tororo','9.5',[10,10]]]
+# animeScores = [[title,malScore,[userscore1,userscore2,etc]]]
 
 def getMALScore(id):
     # return "disabled"
@@ -69,7 +70,7 @@ def main():
                 if show[2][u] != "":
                     counter += 1
             if counter > 1:
-                file.write(show[0].replace(",","") + ",=AVERAGE(F2:K2)," + show[1] + ",")
+                file.write(show[0].replace(",","") + ",=AVERAGE(F2:K2)," + show[1] + ",=COUNTA(F2:K2),")
                 for score in show[2]:
                     file.write(str(score) + ",")
                 file.write("\n")
