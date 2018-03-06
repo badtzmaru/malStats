@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 
 # set up command line arguments 
 parser = argparse.ArgumentParser(description='Generate a csv of anime scores for the given users')
+parser.add_argument('minUsers', metavar='minUsers', type=int, nargs=1, help='The minimum number of users required to display a show in the csv')
 parser.add_argument('-m', action='store_true', help='Add scores from MyAnimeList to the last column of the sheet')
 parser.add_argument('inputValues', nargs='+', help='The names of the users you want added to the csv, with spaces in between')
 args = parser.parse_args()
@@ -93,7 +94,7 @@ def main():
                     userCounter += 1
             
             # if at least two users have completed the show, then add it to the csv
-            if userCounter > 1:
+            if userCounter >= int(args.minUsers[0]):
                 showCounter = showCounter + 1
                 file.write(show[0].replace(",","") + ",")
                 for score in show[2]:
