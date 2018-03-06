@@ -45,6 +45,7 @@ def getXML(user):
 
 # parse the given xml file, and add it to the animeScores list
 def parseList(user,index):
+    time.sleep(.5)
     with open("xml/" + user + ".xml", encoding='utf8') as infile:
 
         # find all <anime> tags
